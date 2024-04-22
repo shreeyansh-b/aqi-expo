@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
 import * as Location from "expo-location";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
@@ -9,6 +9,7 @@ import MapView, { Marker, type LatLng, type Region } from "react-native-maps";
 import { AQI_COLORS_MAP } from "./constants";
 import { useAQIStore } from "./hooks/useAQIStore";
 import { useGetMapBoundsAQI } from "./hooks/useGetMapBoundsAQI";
+import { BottomDrawer } from "./screens/BottomDrawer/BottomDrawer";
 import { nearestMultipleOf25 } from "./utils";
 
 const styles = StyleSheet.create({
@@ -27,6 +28,7 @@ const styles = StyleSheet.create({
 const Main = () => {
   const mapRef = useRef<MapView>(null);
   const bottomSheetRef = useRef<BottomSheet>(null);
+
   const [location, setLocation] = useState<Region | undefined>(undefined);
 
   const [selectedStation, setSelectedStation] = useState<{
@@ -34,6 +36,8 @@ const Main = () => {
     aqi: string;
     name: string;
     time: string;
+    lat: number;
+    lon: number;
   } | null>(null);
 
   const [mapBoundaries, setMapBoundaries] = useState<{
@@ -157,6 +161,8 @@ const Main = () => {
                   aqi: item.aqi,
                   name: item.station.name,
                   time: item.station.time,
+                  lat: item.lat,
+                  lon: item.lon,
                 });
                 bottomSheetRef.current?.expand();
               }}
@@ -178,33 +184,10 @@ const Main = () => {
           );
         })}
       </MapView>
-
-      <BottomSheet ref={bottomSheetRef} snapPoints={[100, 300]}>
-        <BottomSheetView
-          style={{
-            padding: 14,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: "bold",
-              marginBottom: 4,
-            }}
-          >
-            {/* split on first comma */}
-            {selectedStation?.name.split(",")[0]}
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "normal",
-            }}
-          >
-            {selectedStation?.name.split(",").slice(1).join(",").trim()}
-          </Text>
-        </BottomSheetView>
-      </BottomSheet>
+      <BottomDrawer
+        selectedStation={selectedStation}
+        bottomSheetRef={bottomSheetRef}
+      />
     </View>
   );
 };
