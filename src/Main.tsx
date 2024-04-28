@@ -2,9 +2,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
 import * as Location from "expo-location";
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import MapView, { Marker, type LatLng, type Region } from "react-native-maps";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Text } from "tamagui";
 
 import { AQI_COLORS_MAP } from "./constants";
 import { useAQIStore } from "./hooks/useAQIStore";
@@ -15,13 +16,12 @@ import { nearestMultipleOf25 } from "./utils";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#3e3e",
     alignItems: "center",
     justifyContent: "center",
   },
   map: {
     width: "100%",
-    height: "80%",
+    height: "100%",
   },
 });
 
@@ -118,78 +118,81 @@ const Main = () => {
   }, [location]);
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      <MapView
-        style={styles.map}
-        region={location}
-        onRegionChangeComplete={handleRegionChange}
-        zoomControlEnabled
-        showsUserLocation
-        showsMyLocationButton
-        showsPointsOfInterest={false}
-        showsBuildings={false}
-        pitchEnabled={false}
-        ref={mapRef}
-        rotateEnabled={false}
-        provider="google"
-        onPress={(e) => {
-          // if not pressed on marker, close bottom sheet
-          const coordinate = e.nativeEvent.coordinate;
-          const isMarkerPressed = aqiData?.some(
-            (item) =>
-              item.lat === coordinate.latitude &&
-              item.lon === coordinate.longitude,
-          );
-          if (!isMarkerPressed) {
-            setSelectedStation(null);
-            bottomSheetRef.current?.collapse();
-          }
-        }}
-      >
-        {aqiData?.map((item) => {
-          const aqi = nearestMultipleOf25(Number(item.aqi));
-          return (
-            <Marker
-              key={item.uid}
-              coordinate={{
-                latitude: item.lat,
-                longitude: item.lon,
-              }}
-              onPress={() => {
-                setSelectedStation({
-                  uid: String(item.uid),
-                  aqi: item.aqi,
-                  name: item.station.name,
-                  time: item.station.time,
-                  lat: item.lat,
-                  lon: item.lon,
-                });
-                bottomSheetRef.current?.expand();
-              }}
-              // title={item.station.name}
-              // description={`AQI: ${item.aqi}`}
-              // improves performance by not tracking view changes of custom marker
-              tracksViewChanges={false}
-            >
-              <View
-                style={{
-                  backgroundColor: AQI_COLORS_MAP[aqi],
-                  padding: 5,
-                  borderRadius: 5,
+    <SafeAreaView style={{ height: "100%", width: "100%" }}>
+      <View style={styles.container}>
+        <MapView
+          style={styles.map}
+          region={location}
+          onRegionChangeComplete={handleRegionChange}
+          zoomControlEnabled
+          showsUserLocation
+          showsMyLocationButton
+          showsPointsOfInterest={false}
+          showsBuildings={false}
+          pitchEnabled={false}
+          ref={mapRef}
+          rotateEnabled={false}
+          provider="google"
+          onPress={(e) => {
+            // if not pressed on marker, close bottom sheet
+            const coordinate = e.nativeEvent.coordinate;
+            const isMarkerPressed = aqiData?.some(
+              (item) =>
+                item.lat === coordinate.latitude &&
+                item.lon === coordinate.longitude,
+            );
+            if (!isMarkerPressed) {
+              setSelectedStation(null);
+              bottomSheetRef.current?.collapse();
+            }
+          }}
+        >
+          {aqiData?.map((item) => {
+            const aqi = nearestMultipleOf25(Number(item.aqi));
+            return (
+              <Marker
+                key={item.uid}
+                coordinate={{
+                  latitude: item.lat,
+                  longitude: item.lon,
                 }}
+                onPress={() => {
+                  setSelectedStation({
+                    uid: String(item.uid),
+                    aqi: item.aqi,
+                    name: item.station.name,
+                    time: item.station.time,
+                    lat: item.lat,
+                    lon: item.lon,
+                  });
+                  bottomSheetRef.current?.expand();
+                }}
+                // title={item.station.name}
+                // description={`AQI: ${item.aqi}`}
+                // improves performance by not tracking view changes of custom marker
+                tracksViewChanges={false}
               >
-                <Text style={{ color: "#fff" }}>{item.aqi}</Text>
-              </View>
-            </Marker>
-          );
-        })}
-      </MapView>
-      <BottomDrawer
-        selectedStation={selectedStation}
-        bottomSheetRef={bottomSheetRef}
-      />
-    </View>
+                <View
+                  style={{
+                    backgroundColor: AQI_COLORS_MAP[aqi],
+                    padding: 5,
+                    borderRadius: 5,
+                  }}
+                >
+                  <Text userSelect="none">{item.aqi}</Text>
+                </View>
+              </Marker>
+            );
+          })}
+        </MapView>
+        {!!selectedStation && (
+          <BottomDrawer
+            selectedStation={selectedStation}
+            bottomSheetRef={bottomSheetRef}
+          />
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 

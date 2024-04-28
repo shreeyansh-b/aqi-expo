@@ -1,9 +1,11 @@
-import React, { RefObject } from "react";
+import React, { RefObject, useMemo } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { ActivityIndicator, Text } from "react-native";
+import { H4, H6, Spinner } from "tamagui";
 
 import { useGetAQIByLatLon } from "../../hooks/useGetAQIByLatLon";
+import { getAQICategory } from "../../utils";
+import { TodaysAQI } from "../TodaysAQI/TodaysAQI";
 
 type Props = {
   selectedStation: {
@@ -23,45 +25,42 @@ const BottomDrawer = ({ selectedStation, bottomSheetRef }: Props) => {
     lon: selectedStation?.lon ?? 0,
   });
 
+  const aqiCategory = useMemo(() => {
+    return getAQICategory(data?.aqi);
+  }, [data?.aqi]);
+
   return (
-    <BottomSheet ref={bottomSheetRef} snapPoints={[100, 300]}>
+    <BottomSheet
+      ref={bottomSheetRef}
+      snapPoints={[100, 300]}
+      backgroundStyle={{
+        backgroundColor: aqiCategory.backgroundColor,
+      }}
+    >
       <BottomSheetView
         style={{
           paddingLeft: 16,
           paddingRight: 16,
         }}
       >
-        {isLoading && (
-          <ActivityIndicator
-            style={{
-              transform: [{ scaleX: 2.5 }, { scaleY: 2.5 }],
-              marginTop: 32,
-            }}
-            color="#243c5a"
-          />
-        )}
+        {isLoading && <Spinner size="large" />}
         {!isLoading && (
           <>
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-                marginBottom: 4,
-              }}
+            <H4
+              userSelect="none"
+              fontWeight="$16"
+              letterSpacing={1}
+              marginBottom={-4}
             >
               {/* split on first comma */}
               {selectedStation?.name.split(",")[0]}
-            </Text>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "normal",
-              }}
-            >
+            </H4>
+            <H6 userSelect="none" fontWeight="$5" letterSpacing={1}>
               {selectedStation?.name.split(",").slice(1).join(",").trim()}
-            </Text>
+            </H6>
           </>
         )}
+        <TodaysAQI aqi={data?.aqi} aqiCategory={aqiCategory} />
       </BottomSheetView>
     </BottomSheet>
   );
