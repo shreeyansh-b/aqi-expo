@@ -1,7 +1,7 @@
 import React, { RefObject } from "react";
 
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
-import { Text } from "react-native";
+import { ActivityIndicator, Text } from "react-native";
 
 import { useGetAQIByLatLon } from "../../hooks/useGetAQIByLatLon";
 
@@ -22,6 +22,7 @@ const BottomDrawer = ({ selectedStation, bottomSheetRef }: Props) => {
     lat: selectedStation?.lat ?? 0,
     lon: selectedStation?.lon ?? 0,
   });
+
   return (
     <BottomSheet ref={bottomSheetRef} snapPoints={[100, 300]}>
       <BottomSheetView
@@ -30,24 +31,37 @@ const BottomDrawer = ({ selectedStation, bottomSheetRef }: Props) => {
           paddingRight: 16,
         }}
       >
-        <Text
-          style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            marginBottom: 4,
-          }}
-        >
-          {/* split on first comma */}
-          {selectedStation?.name.split(",")[0]}
-        </Text>
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: "normal",
-          }}
-        >
-          {selectedStation?.name.split(",").slice(1).join(",").trim()}
-        </Text>
+        {isLoading && (
+          <ActivityIndicator
+            style={{
+              transform: [{ scaleX: 2.5 }, { scaleY: 2.5 }],
+              marginTop: 32,
+            }}
+            color="#243c5a"
+          />
+        )}
+        {!isLoading && (
+          <>
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                marginBottom: 4,
+              }}
+            >
+              {/* split on first comma */}
+              {selectedStation?.name.split(",")[0]}
+            </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "normal",
+              }}
+            >
+              {selectedStation?.name.split(",").slice(1).join(",").trim()}
+            </Text>
+          </>
+        )}
       </BottomSheetView>
     </BottomSheet>
   );

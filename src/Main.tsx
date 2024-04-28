@@ -142,6 +142,7 @@ const Main = () => {
               item.lon === coordinate.longitude,
           );
           if (!isMarkerPressed) {
+            setSelectedStation(null);
             bottomSheetRef.current?.collapse();
           }
         }}
