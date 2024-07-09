@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import BottomSheet from "@gorhom/bottom-sheet/lib/typescript/components/bottomSheet/BottomSheet";
 import * as Location from "expo-location";
+import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker, type LatLng, type Region } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -119,6 +120,7 @@ const Main = () => {
 
   return (
     <SafeAreaView style={{ height: "100%", width: "100%" }}>
+      <StatusBar style="auto" />
       <View style={styles.container}>
         <MapView
           style={styles.map}
